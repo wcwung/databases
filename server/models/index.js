@@ -1,34 +1,37 @@
-var db = require('../db');
+var Sequelize = require('sequelize');
+var sql = new Sequelize('chat', 'root');
 
-db.connect();
+var user = sql.define('user', {
+  username: Sequelize.STRING
+});
+user.sync();
+
+var message = sql.define('message', {
+  text: Sequelize.STRING,
+  roomName: Sequelize.STRING,
+  username: Sequelize.STRING,
+  createdAt: Sequelize.STRING
+});
+message.sync();
 
 module.exports = {
   messages: {
-    get: function (callback) {
-      db.query('SELECT * from messages', function(err,rows,fields){
+    get: function(callback){
+      message.findAll().success(function(data){
         var obj = {
-          results: rows
-        };
-        return callback(obj);
-      });
-    }, // a function which produces all the messages
-    post: function (body) {
-      var createdAt = new Date();
-      var data = '("' + body.text + '","' + body.username + '","' + createdAt.toISOString() + '")'
-      db.query('INSERT INTO messages(text, username, createdAt) VALUE' + data);
-    } // a function which can be used to insert a message into the database
-  },
-
-  users: {
-    // Ditto as above.
-    get: function () {},
-    post: function (body) {
-      db.query('SELECT * from users', function(err, rows){
-        if (!rows.length){
-          db.query('INSERT INTO users(username) VALUE ("' + body.username + '")');
+          results: data
         }
+        return callback(obj);
       })
+    },
+    post: function(body){
+      var date = new Date();
+      message.build({username: body.username, text: body.text, createdAt: date.toISOString()}).save();
+    }
+  },
+  users: {
+    post: function(body){
+      user.build({username: body.username}).save();
     }
   }
-};
-
+}
