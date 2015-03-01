@@ -3,13 +3,12 @@ var models = require('../models');
 module.exports = {
   messages: {
     get: function (req, res) {
-      models.messages.get()
-        .then(function(obj){
-          res.send(obj);
-        });
+      models.messages.get(function(obj){
+        res.send(obj);
+      });
     },
     post: function (req, res) {
-      models.messages.post(req);
+      models.messages.post(req.body);
       res.send();
     }
   },
